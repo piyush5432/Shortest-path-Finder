@@ -1,0 +1,466 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+		{
+			"contents": "import turtle as tl\nimport tkinter.messagebox as tmsg\nimport numpy as np\nimport random\n'''\nThis is a shortest path finder which uses the concept of bfs to find the shortest point between two points in a grid.\nthe user is free to draw as much number of hurdles as possible in between the source and destination.\nAnd the algorithm will come up with an optimal solution(if exist).\n \n'''\n\nclass BFS:\n\tdef __init__(self,a,b):\n\t\tself.x = a\n\t\tself.y = b\n\t\tself.n = self.x*self.y \n\t\tself.matrix = np.zeros((self.n, self.n))\n\t\n\tdef adjacency(self, prohibited):\n\t\tfor i in range(self.n):\n\t\t\tif i not in prohibited:\n\t\t\t\tfor j in range(self.n):\n\t\t\t\t\tif j==i+self.x or j==i-self.x:\n\t\t\t\t\t\tself.matrix[i][j] = 1\n\t\t\t\t\tif i%self.x==0:\n\t\t\t\t\t\tif j==i+1:\n\t\t\t\t\t\t\tself.matrix[i][j] = 1\n\t\t\t\t\telif (i+1)%self.x==0:\n\t\t\t\t\t\tif j==i-1:\n\t\t\t\t\t\t\tself.matrix[i][j] = 1\t\t\t\n\t\t\t\t\telse:\n\t\t\t\t\t\tif j==i+1 or j==i-1:\n\t\t\t\t\t\t\tself.matrix[i][j] = 1\t\n\tdef calculate_distance(self ,m, n):\n\t\tself.visited = np.zeros(self.n)\n\t\tself.parent = np.zeros(self.n)\n\t\tself.visited[m] =1\n\t\tself.queue =[]\n\t\tself.queue.append(m)\n\t\twhile len(self.queue)>0:\n\t\t\ta = self.queue[0]\n\t\t\tself.queue.remove(a)\n\t\t\tfor i in range(self.n):\n\t\t\t\tif self.matrix[a][i]==1 and self.visited[i]==0:\n\t\t\t\t\tself.parent[i]= a\n\t\t\t\t\tself.visited[i]= 1\n\t\t\t\t\tself.queue.append(i)\n\t\t\t\t\tif i==n:\n\t\t\t\t\t\tself.queue=[]\n\t\t\t\t\t\tbreak\n\t\tif i!=n:\n\t\t\treturn\t\t\t\t\n\t\tself.traversed =[]\n\t\tp=int(self.parent[n])\n\t\tself.traversed.append(p)\n\t\twhile(p!=m):\n\t\t\tp = int(self.parent[p])\n\t\t\tif p==m:\n\t\t\t\tbreak\n\t\t\tself.traversed.append(p)\n\n\t\t\nclass Body:\n\tdef __init__(self):\n\t\tself.width = 1000\n\t\tself.height = 700\n\t\tself.screen =tl.Screen()\n\t\tself.screen.setup(self.width, self.height)\n\t\tself.screen.title(\"Finding the shortest path between two points.\")\n\t\tself.screen.bgcolor(\"white\")\n\t\tself.x=0\n\t\tself.y=0\n\t\tself.run =True\n\t\tself.dx = 48\n\t\tself.dy =20\n\t\tself.step = 20\n\t\tself.cy = 110\n\t\tself.cx = -470\t\t\n\t\tself.prohibited=[]\n\t\tself.rs =[]\n\t\tself.write()\n\t\tself.grid()\n\t\tself.allow = True\n\t\t#self.main()\n\t\tself.hs =[]\n\t\tself.start_pt = 0\n\t\tself.end_pt = 959\n\t\tself.start = True\n\t\tself.end =False\n\t\tself.hurdles =False\t\t\n\t\tself.listen_mouse_clicks()\t\n\t\tself.screen.mainloop()\t\n\t\t\n\n\tdef main(self):\n\t\tb= BFS(self.dx,self.dy)\n\t\tb.adjacency(self.prohibited)\n\t\ttry:\n\t\t\tb.calculate_distance(self.start_pt,self.end_pt)\n\t\t\tfor i in self.rs:\n\t\t\t\ti.goto(1000,1000)\n\t\t\tself.rs.clear()\n\t\t\tfor i in b.traversed:\n\t\t\t\tself.draw_point(i)\n\t\texcept:\n\t\t\ttmsg.showinfo(\"Not Found\",\"No path found between between the start and the end points\")\t\t\n\n\t\t'''\t\t\n\t\t#self.draw_point(959)\n\t\t#while self.run:\n\t\t\n\t\t#\tself.screen.update()\n\t\t'''\n\tdef draw_point(self ,n):\n\t\tself.block = tl.Turtle()\n\t\tself.block.penup()\n\t\tself.block.shape(\"square\")\n\t\tself.block.color(\"black\")\n\t\tself.block.speed(0)\n\t\tself.block.goto(self.cx+20*(n%self.dx),self.cy-20*(n//self.dx))\t\n\t\tself.rs.append(self.block)\n\n\tdef draw_start(self):\n\t\tself.start=True\n\t\tself.end = False\n\t\tself.hurdles=False\n\n\tdef draw_end(self):\n\t\tself.start=False\n\t\tself.end = True\n\t\tself.hurdles=False\n\n\tdef draw_hurdles(self):\n\t\tself.start=False\n\t\tself.end = False\n\t\tself.hurdles=True\n\tdef write(self):\n\t\tself.pen = tl.Turtle()\n\t\tself.pen.penup()\n\t\tself.pen.hideturtle()\n\t\tself.pen.speed(0)\n\t\tself.pen.color(\"black\")\n\t\tself.pen.goto(-480,300)\n\t\tself.pen.write(\"Shortest Path Finder\",False,align=\"left\",font=(\"arial\",20,\"bold\"))\t\n\t\tself.pen.goto(-480,270)\n\t\tself.pen.write(\"Instructions:\",False,align=\"left\",font=(\"arial\",15,\"bold\"))\t\n\t\tself.pen.goto(-480,250)\n\t\tself.pen.write(\"a) Press 's' in the keyboard and click anywhere on grid to place the starting point.(color: green)\",False,align=\"left\",font=(\"arial\",10,\"bold\"))\t\n\t\tself.pen.goto(-480,230)\n\t\tself.pen.write(\"b) Press 'e' in the keyboard and click anywhere on grid to place the ending point.(color:blue)\",False,align=\"left\",font=(\"arial\",10,\"bold\"))\t\n\t\tself.pen.goto(-480,210)\n\t\tself.pen.write(\"c) Press 'h' in the keyboard and click anywhere on grid to place the hurdles.(color: red)\",False,align=\"left\",font=(\"arial\",10,\"bold\"))\n\t\tself.pen.goto(-480,190)\n\t\tself.pen.write(\"d) Press 'r' in the keyboard to place some random hurdles on the grid.\",False,align=\"left\",font=(\"arial\",10,\"bold\"))\n\t\tself.pen.goto(-480,170)\n\t\tself.pen.write(\"e) Press 'space bar' in the keyboard to see the shortest path(colored in black)\",False,align=\"left\",font=(\"arial\",10,\"bold\"))\n\t\tself.pen.goto(-480,150)\n\t\tself.pen.write(\"f) Press 'o' in the keyboard to clear the grid.\",False,align=\"left\",font=(\"arial\",10,\"bold\"))\n\n\tdef draw_squares(self,x,y):\n\t\txcor =None\n\t\tycor =None\n\t\tfor i in range(self.dx):\n\t\t\tif x<(self.cx+20*i)+10 and x>(self.cx+20*i)-10:\n\t\t\t\txcor= self.cx+20*i\n\t\t\t\tbreak\n\t\tfor j in range(self.dy):\n\t\t\tif y<(self.cy-20*j)+10 and y>(self.cy-20*j)-10:\n\t\t\t\tycor= self.cy-20*j\n\t\t\t\tbreak\n\t\tif self.hurdles:\t\t\n\t\t\tif xcor and ycor:\t\n\t\t\t\tloc =j*self.dx + i\n\t\t\t\tself.prohibited.append(loc)\t\n\t\t\t\tself.t = tl.Turtle()\n\t\t\t\tself.t.penup()\n\t\t\t\tself.t.shape(\"square\")\n\t\t\t\tself.t.color(\"red\")\n\t\t\t\tself.t.speed(-1)\n\t\t\t\tself.t.goto(xcor,ycor)\n\t\t\t\tself.hs.append(self.t)\n\t\tif self.start:\n\t\t\tif xcor and ycor:\t\n\t\t\t\tself.start_pt =j*self.dx + i\n\t\t\t\ttry:\n\t\t\t\t\tself.st.goto(xcor,ycor)\n\t\t\t\texcept:\t\n\t\t\t\t\tself.st = tl.Turtle()\n\t\t\t\t\tself.st.penup()\n\t\t\t\t\tself.st.shape(\"square\")\n\t\t\t\t\tself.st.color(\"green\")\n\t\t\t\t\tself.st.speed(-1)\n\t\t\t\t\tself.st.goto(xcor,ycor)\n\t\tif self.end:\n\t\t\tif xcor and ycor:\t\n\t\t\t\tself.end_pt = j*self.dx + i\n\t\t\t\ttry:\n\t\t\t\t\tself.et.goto(xcor,ycor)\n\t\t\t\texcept:\t\n\t\t\t\t\tself.et = tl.Turtle()\n\t\t\t\t\tself.et.penup()\n\t\t\t\t\tself.et.shape(\"square\")\n\t\t\t\t\tself.et.color(\"blue\")\n\t\t\t\t\tself.et.speed(-1)\n\t\t\t\t\tself.et.goto(xcor,ycor)\t\n\tdef erase_all(self):\n\t\ttry:\n\t\t\tself.et.goto(1000,1000)\n\t\t\tself.st.goto(1000,1000)\n\t\t\tfor i in self.hs:\n\t\t\t\ti.goto(1000,1000)\n\t\t\tself.hs = []\n\t\t\tself.prohibited=[]\t\n\t\t\tfor i in self.rs:\n\t\t\t\ti.goto(1000,1000)\n\t\t\tself.rs = []\t\t\t\n\t\texcept:\n\t\t\tpass\t\n\tdef random_hurdles(self):\n\t\tif self.allow:\n\t\t\tfor i in range(100):\n\t\t\t\tloc = random.randint(0,959)\n\t\t\t\tself.prohibited.append(loc)\t\n\t\t\t\tself.t = tl.Turtle()\n\t\t\t\tself.t.penup()\n\t\t\t\tself.t.shape(\"square\")\n\t\t\t\tself.t.color(\"red\")\n\t\t\t\tself.t.speed(-1)\n\t\t\t\tself.t.goto(self.cx+20*(loc%self.dx),self.cy-20*(loc//self.dx))\t\n\t\t\t\tself.hs.append(self.t)\t\n\t\t\t\tself.allow =False\t\t\t\t\n\t\tself.allow =True\t\n\n\t\t\n\tdef listen_mouse_clicks(self):\t\n\t\tself.screen.listen()\n\t\tself.screen.onclick(self.draw_squares)\n\t\tself.screen.onkeypress(self.main,\"space\")\n\t\tself.screen.onkeypress(self.draw_start,\"s\")\n\t\tself.screen.onkeypress(self.draw_end,\"e\")\n\t\tself.screen.onkeypress(self.draw_hurdles,\"h\")\n\t\tself.screen.onkeypress(self.erase_all,\"o\")\n\t\tself.screen.onkeypress(self.random_hurdles,\"r\")\n\n\t\t\n\n\tdef grid(self):\n\n\t\tself.g = tl.Turtle()\n\t\tself.g.color(\"black\") \n\t\tself.g.hideturtle()\n\t\tself.g.speed(-1)\n\t\tfor i in range(21):\n\t\t\tself.g.penup()\n\t\t\tself.g.goto(-480,+120-(20*i))\n\t\t\tself.g.pendown()\n\t\t\tself.g.forward(480*2)\t\n\t\tfor i in range(49):\n\t\t\tself.g.penup()\n\t\t\tself.g.setheading(-90)\n\t\t\tself.g.goto(-480+20*i,+120)\n\t\t\tself.g.pendown()\n\t\t\tself.g.forward(400)\t\t\n\t\t\t'''\n\t\tself.block = tl.Turtle()\n\t\tself.block.penup()\n\t\tself.block.shape(\"square\")\n\t\tself.block.color(\"black\")\n\t\tself.block.speed(0)\n\t\tself.block.goto(self.cx+20*(self.dx-1),self.cy-20*(self.dy-1))\t\n\t\t'''\n\nif __name__==\"__main__\":\n\tb =Body()",
+			"settings":
+			{
+				"buffer_size": 7211,
+				"line_ending": "Windows",
+				"name": "import turtle as tl"
+			},
+			"undo_stack":
+			[
+				[
+					1,
+					1,
+					"insert",
+					{
+						"characters": "su"
+					},
+					"AgAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAAAAAAAAAAA",
+					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvw"
+				],
+				[
+					2,
+					2,
+					"left_delete",
+					null,
+					"AgAAAAEAAAAAAAAAAQAAAAAAAAABAAAAdQAAAAAAAAAAAAAAAAAAAAABAAAAcw",
+					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAIAAAAAAAAAAgAAAAAAAAAAAAAAAADwvw"
+				],
+				[
+					3,
+					1,
+					"insert",
+					{
+						"characters": "print"
+					},
+					"BQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAMAAAAAAAAAAAAAAAMAAAAAAAAABAAAAAAAAAAAAAAABAAAAAAAAAAFAAAAAAAAAAAAAAA",
+					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvw"
+				],
+				[
+					4,
+					1,
+					"insert_snippet",
+					{
+						"contents": "($0)"
+					},
+					"AQAAAAUAAAAAAAAABwAAAAAAAAAAAAAA",
+					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAUAAAAAAAAABQAAAAAAAAAAAAAAAADwvw"
+				],
+				[
+					5,
+					1,
+					"insert_snippet",
+					{
+						"contents": "\"$0\""
+					},
+					"AQAAAAYAAAAAAAAACAAAAAAAAAAAAAAA",
+					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAYAAAAAAAAABgAAAAAAAAAAAAAAAADwvw"
+				],
+				[
+					6,
+					1,
+					"insert",
+					{
+						"characters": "Hello"
+					},
+					"BQAAAAcAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAJAAAAAAAAAAAAAAAJAAAAAAAAAAoAAAAAAAAAAAAAAAoAAAAAAAAACwAAAAAAAAAAAAAACwAAAAAAAAAMAAAAAAAAAAAAAAA",
+					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAcAAAAAAAAABwAAAAAAAAAAAAAAAADwvw"
+				],
+				[
+					7,
+					1,
+					"insert",
+					{
+						"characters": " World"
+					},
+					"BgAAAAwAAAAAAAAADQAAAAAAAAAAAAAADQAAAAAAAAAOAAAAAAAAAAAAAAAOAAAAAAAAAA8AAAAAAAAAAAAAAA8AAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAAAAARAAAAAAAAAAAAAAARAAAAAAAAABIAAAAAAAAAAAAAAA",
+					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAwAAAAAAAAADAAAAAAAAAAAAAAAAADwvw"
+				],
+				[
+					40,
+					27,
+					"left_delete",
+					null,
+					"FAAAABMAAAAAAAAAEwAAAAAAAAABAAAAKRIAAAAAAAAAEgAAAAAAAAABAAAAIhEAAAAAAAAAEQAAAAAAAAABAAAAZBAAAAAAAAAAEAAAAAAAAAABAAAAbA8AAAAAAAAADwAAAAAAAAABAAAAcg4AAAAAAAAADgAAAAAAAAABAAAAbw0AAAAAAAAADQAAAAAAAAABAAAAVwwAAAAAAAAADAAAAAAAAAABAAAAIAsAAAAAAAAACwAAAAAAAAABAAAAbwoAAAAAAAAACgAAAAAAAAABAAAAbAkAAAAAAAAACQAAAAAAAAABAAAAbAgAAAAAAAAACAAAAAAAAAABAAAAZQcAAAAAAAAABwAAAAAAAAABAAAASAYAAAAAAAAABgAAAAAAAAABAAAAIgUAAAAAAAAABQAAAAAAAAABAAAAKAQAAAAAAAAABAAAAAAAAAABAAAAdAMAAAAAAAAAAwAAAAAAAAABAAAAbgIAAAAAAAAAAgAAAAAAAAABAAAAaQEAAAAAAAAAAQAAAAAAAAABAAAAcgAAAAAAAAAAAAAAAAAAAAABAAAAcA",
+					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAABQAAAAAAAAAFAAAAAAAAAAAAAAAAADwvw"
+				],
+				[
+					41,
+					1,
+					"paste",
+					null,
+					"AQAAAAAAAAAAAAAACAAAAAAAAAAAAAAA",
+					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvw"
+				],
+				[
+					42,
+					13,
+					"left_delete",
+					null,
+					"CAAAAAcAAAAAAAAABwAAAAAAAAABAAAALQYAAAAAAAAABgAAAAAAAAABAAAAIAUAAAAAAAAABQAAAAAAAAABAAAAbgQAAAAAAAAABAAAAAAAAAABAAAAbwMAAAAAAAAAAwAAAAAAAAABAAAAaAIAAAAAAAAAAgAAAAAAAAABAAAAdAEAAAAAAAAAAQAAAAAAAAABAAAAeQAAAAAAAAAAAAAAAAAAAAABAAAAcA",
+					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAgAAAAAAAAACAAAAAAAAAAAAAAAAADwvw"
+				],
+				[
+					45,
+					1,
+					"paste",
+					null,
+					"AQAAAAAAAAAAAAAAKxwAAAAAAAAAAAAA",
+					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvw"
+				]
+			]
+		},
+		{
+			"contents": "#include<iostream>\n",
+			"settings":
+			{
+				"buffer_size": 19,
+				"line_ending": "Windows",
+				"name": "#include<iostream>"
+			},
+			"undo_stack":
+			[
+				[
+					3,
+					1,
+					"insert",
+					{
+						"characters": "#include"
+					},
+					"CAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAMAAAAAAAAAAAAAAAMAAAAAAAAABAAAAAAAAAAAAAAABAAAAAAAAAAFAAAAAAAAAAAAAAAFAAAAAAAAAAYAAAAAAAAAAAAAAAYAAAAAAAAABwAAAAAAAAAAAAAABwAAAAAAAAAIAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					4,
+					1,
+					"insert",
+					{
+						"characters": "<iost"
+					},
+					"BQAAAAgAAAAAAAAACQAAAAAAAAAAAAAACQAAAAAAAAAKAAAAAAAAAAAAAAAKAAAAAAAAAAsAAAAAAAAAAAAAAAsAAAAAAAAADAAAAAAAAAAAAAAADAAAAAAAAAANAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAACAAAAAAAAAAIAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					5,
+					1,
+					"insert",
+					{
+						"characters": "ream>"
+					},
+					"BQAAAA0AAAAAAAAADgAAAAAAAAAAAAAADgAAAAAAAAAPAAAAAAAAAAAAAAAPAAAAAAAAABAAAAAAAAAAAAAAABAAAAAAAAAAEQAAAAAAAAAAAAAAEQAAAAAAAAASAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAADQAAAAAAAAANAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					6,
+					1,
+					"insert",
+					{
+						"characters": "\n"
+					},
+					"AQAAABIAAAAAAAAAEwAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAEgAAAAAAAAASAAAAAAAAAAAAAAAAAPC/"
+				]
+			]
+		}
+	],
+	"build_system": "Packages/Python/Python.sublime-build",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/C++/C++ Single File.sublime-build",
+					""
+				],
+				[
+					"Packages/C++/C++ Single File.sublime-build",
+					"Run"
+				]
+			],
+			[
+				"Packages/C++/C++ Single File.sublime-build",
+				""
+			]
+		],
+		[
+			[
+				[
+					"Packages/Python/Python.sublime-build",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					"Syntax Check"
+				]
+			],
+			[
+				"Packages/Python/Python.sublime-build",
+				""
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"Install ",
+				"Install Package Control"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 134.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Users/Piyush/Desktop/Codes/outputf.in",
+		"/C/Users/Piyush/Desktop/Codes/web",
+		"/C/Users/Piyush/Desktop/Codes/code_1.cpp",
+		"/C/Users/Piyush/AppData/Local/Programs/Python/Python310/python.exe",
+		"/C/Users/Piyush/Desktop/Codes/new.py",
+		"/C/Users/Piyush/Desktop/Codes/inputf.in",
+		"/C/Users/Piyush/AppData/Roaming/Sublime Text 3/Packages/User/C++14.sublime-build",
+		"/C/Users/Piyush/AppData/Roaming/Sublime Text 3/Packages/User/C++14",
+		"/C/Users/Piyush/AppData/Roaming/Sublime Text 3/Packages/User/c",
+		"/C/Users/Piyush/AppData/Roaming/Sublime Text 3/Packages/User/C++14_new",
+		"/C/Users/Piyush/AppData/Roaming/Sublime Text 3/Packages/User/c++14"
+	],
+	"find":
+	{
+		"height": 0.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"scrollbar_highlights": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"use_gitignore": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7211,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7211,
+								7211
+							]
+						],
+						"settings":
+						{
+							"auto_name": "import turtle as tl",
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"selected": true,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 19,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								19,
+								19
+							]
+						],
+						"settings":
+						{
+							"auto_name": "#include<iostream>",
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"stack_multiselect": false,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"sheets":
+			[
+			]
+		},
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			],
+			[
+				2,
+				0,
+				3,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.729479166666,
+			0.81,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 284.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "Packages/Python/Python.sublime-build",
+	"project": "Summerproject.py",
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
